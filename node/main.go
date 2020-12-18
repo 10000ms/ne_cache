@@ -1,67 +1,24 @@
 package node
 
 import (
-	"context"
-	"flag"
-	"fmt"
-	"log"
-	"time"
-
+	"Demo/example"
+	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	pb "google.golang.org/grpc/examples/features/proto/echo"
-	_ "google.golang.org/grpc/health"
-	"google.golang.org/grpc/resolver"
-	"google.golang.org/grpc/resolver/manual"
+	"log"
 )
 
-var serviceConfig = `{
-	"loadBalancingPolicy": "round_robin",
-	"healthCheckConfig": {
-		"serviceName": ""
-	}
-}`
-
-func callUnaryEcho(c pb.EchoClient) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	r, err := c.UnaryEcho(ctx, &pb.EchoRequest{})
-	if err != nil {
-		fmt.Println("UnaryEcho: _, ", err)
-	} else {
-		fmt.Println("UnaryEcho: ", r.GetMessage())
-	}
-}
-
+// main 方法实现对 gRPC 接口的请求
 func main() {
-	flag.Parse()
-
-	r := manual.NewBuilderWithScheme("whatever")
-	r.InitialState(resolver.State{
-		Addresses: []resolver.Address{
-			{Addr: "localhost:50051"},
-			{Addr: "localhost:50052"},
-		},
-	})
-
-	address := fmt.Sprintf("%s:///unused", r.Scheme())
-
-	options := []grpc.DialOption{
-		grpc.WithInsecure(),
-		grpc.WithBlock(),
-		grpc.WithResolvers(r),
-		grpc.WithDefaultServiceConfig(serviceConfig),
-	}
-
-	conn, err := grpc.Dial(address, options...)
+	addr := Settings["Server_addr"].(string)
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("did not connect %v", err)
+		log.Fatalln("Can't connect: " + addr)
 	}
 	defer conn.Close()
-
-	echoClient := pb.NewEchoClient(conn)
-
-	for {
-		callUnaryEcho(echoClient)
-		time.Sleep(time.Second)
+	client := example.NewFormatDataClient(conn)
+	resp,err := client.DoFormat(context.Background(), &example.Data{Text:"hello,world!"})
+	if err != nil {
+		log.Fatalln("Do Format error:" + err.Error())
 	}
+	log.Println(resp.Text)
 }
