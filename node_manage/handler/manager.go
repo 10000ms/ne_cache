@@ -5,19 +5,19 @@ import (
 	"neko_server_go"
 	"neko_server_go/utils"
 
-	"ne_cache/server"
+	"ne_cache/node_manage"
 )
 
 func NodeAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 
 	nodeAddr := c.Request.PostForm.Get("node_addr")
 
-	n := server.SingleNode{
+	n := node_manage.SingleNode{
 		NodeAddr: nodeAddr,
-		Status: server.NodeStatusUnKnow,
+		Status: node_manage.NodeStatusUnKnow,
 	}
 
-	server.NodeList = append(server.NodeList, &n)
+	node_manage.NodeList = append(node_manage.NodeList, &n)
 
 	_, err := fmt.Fprintf(w, "") //这个写入到w的是输出到客户端的
 	if err != nil {

@@ -10,6 +10,4 @@ import (
 var Router = neko_server_go.Router{
 	"/v1/cache/add/(?P<cache_key>.*)": core.CreateMethodsHandler(enum.HttpMethodsPost, handler.CacheAdd),
 	"/v1/cache/get/(?P<cache_key>.*)": core.CreateMethodsHandler(enum.HttpMethodsGet, handler.CacheAdd),
-
-	"/v1/node/add": core.CreateMethodsHandler(enum.HttpMethodsGet, handler.NodeAdd),
 }

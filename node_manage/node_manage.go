@@ -1,4 +1,4 @@
-package server
+package node_manage
 
 import (
 	"google.golang.org/grpc"

@@ -20,19 +20,9 @@ func getPath() string {
 }
 
 var Settings = neko_server_go.Setting{
-	"ServiceName": "ne_cache_main_server",
+	"ServiceName": "ne_cache_proxy_server",
 	"Host":        "127.0.0.1",
 	"Port":        "11100",
 	"Debug":       true,
 	"Path":        getPath(),
-	"Db": map[string]map[string]string{
-		"Default": {
-			"Username": "test",
-			"Password": "123456",
-			"Network":  "tcp",
-			"Server":   "127.0.0.1",
-			"Port":     "3306",
-			"Database": "test",
-		},
-	},
 }
