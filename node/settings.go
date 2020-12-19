@@ -2,5 +2,6 @@ package node
 
 
 var Settings = map[string]interface{}{
-	"Server_addr": "localhost:8080",
+	"server_addr": "localhost:8080",
+	"node_port": 8080,
 }
