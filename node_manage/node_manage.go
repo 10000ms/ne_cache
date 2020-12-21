@@ -1,7 +1,6 @@
 package node_manage
 
 import (
-	"google.golang.org/grpc"
 	"time"
 )
 
@@ -14,9 +13,9 @@ const (
 )
 
 type SingleNode struct {
-	NodeAddr string
-	Status NodeStatus
-	conn grpc.ClientConn
+	NodeAddr string  `json:"node_addr"`
+	Status NodeStatus  `json:"status"`
+	Uuid string  `json:"uuid"`
 }
 
 
