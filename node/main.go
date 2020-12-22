@@ -1,55 +1,56 @@
 package node
 
 import (
-	"Demo/example"
+	"context"
 	"fmt"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"io/ioutil"
 	"log"
+	grpcService "ne_cache/node/grpc"
+	"neko_server_go/utils"
 	"net"
 	"net/http"
-	"strconv"
-	"strings"
+	"net/url"
 )
+
+
+type HealthServer struct {
+
+}
+
+func(h *HealthServer) NodeHealthCheck(ctx context.Context, request *grpcService.HealthCheckRequest) (*grpcService.HealthCheckResponse, error) {
+
+}
 
 // main 方法实现对 gRPC 接口的请求
 func main() {
-	addr := Settings["server_addr"].(string)
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	// 1. new一个grpc的server
+	rpcServer := grpc.NewServer()
+
+	// 2. 将刚刚我们新建的ProdService注册进去
+	grpcService.RegisterNodeHealthServer(rpcServer, &HealthServer{})
+
+	// 3. 新建一个listener，以tcp方式监听8082端口
+	listener, err := net.Listen("tcp", ":" + Settings["node_port"].(string))
 	if err != nil {
-		log.Fatalln("Can't connect: " + addr)
+		log.Fatal("服务监听端口失败", err)
 	}
-	defer conn.Close()
-	client := example.NewFormatDataClient(conn)
-	resp, err := client.DoFormat(context.Background(), &example.Data{Text: "hello,world!"})
-	if err != nil {
-		log.Fatalln("Do Format error:" + err.Error())
-	}
-	log.Println(resp.Text)
+
+	// 4. 运行rpcServer，传入listener
+	_ = rpcServer.Serve(listener)
 }
 
 func RegisterNode() {
 	serverAddr := Settings["server_addr"].(string)
-	nodePortTemp := Settings["node_port"].(string)
-	//nodePort, err := strconv.ParseInt(nodePortTemp, 10, 64)
-	body := "node_addr=" + GetLocalIp() + nodePortTemp
-	resp, err := http.Post(serverAddr,
-		"application/x-www-form-urlencoded",
-		strings.NewReader(body))
+	nodePort := Settings["node_port"].(string)
+	_, err := http.PostForm(serverAddr, url.Values{
+		"node_addr": {GetLocalIp() + nodePort},
+		"uuid":      {Settings["uuid"].(string)},
+	})
 	if err != nil {
-		fmt.Println(err)
+		utils.LogError(err)
 	}
 
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		// handle error
-	}
-
-	fmt.Println(string(body))
 }
-
 
 //获取本机ip
 func GetLocalIp() string {
