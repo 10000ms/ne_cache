@@ -13,12 +13,13 @@ import (
 )
 
 
-type HealthServer struct {
-
-}
+type HealthServer struct {}
 
 func(h *HealthServer) NodeHealthCheck(ctx context.Context, request *grpcService.HealthCheckRequest) (*grpcService.HealthCheckResponse, error) {
-
+	r := grpcService.HealthCheckResponse{
+		Status: grpcService.HealthCheckResponse_SERVING,
+	}
+	return &r, nil
 }
 
 // main 方法实现对 gRPC 接口的请求
