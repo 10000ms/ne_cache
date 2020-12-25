@@ -17,11 +17,11 @@ func NodeAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 
 	n := node_manage.SingleNode{
 		NodeAddr: nodeAddr,
-		Status: node_manage.NodeStatusUnKnow,
-		Uuid: uuid,
+		Status:   node_manage.NodeStatusUnKnow,
 	}
 
-	node_manage.NodeList = append(node_manage.NodeList, &n)
+
+	node_manage.NodeList[uuid] = &n
 
 	_, err := fmt.Fprintf(w, "") //这个写入到w的是输出到客户端的
 	if err != nil {
@@ -30,13 +30,13 @@ func NodeAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 	}
 }
 
-
 func AllNodeInfo(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 	buf := &bytes.Buffer{}
 	encoder := json.NewEncoder(buf)
-	err := encoder.Encode(node_manage.NodeList)
+	l := node_manage.LiveNodeList()
+	err := encoder.Encode(l)
 	if err != nil {
-		utils.LogError(err, "Json unMarshal失败， c:%v", node_manage.NodeList)
+		utils.LogError(err, "Json unMarshal失败， c:%v", l)
 	}
 	body := buf.Bytes()
 

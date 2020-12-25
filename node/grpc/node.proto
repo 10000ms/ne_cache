@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package ne_cache.node.grpc;
+option go_package = "node/grpc";
+
+
+// set
+message SetValueRequest {
+    string key = 1;
+    bytes value = 2;
+    int64 expire = 3;
+}
+
+message SetValueResponse {
+  enum Status {
+	FAIL = 0;
+	OK = 1;
+  }
+  Status status = 1;
+}
+
+
+// get
+message GetValueRequest {
+    string key = 1;
+}
+
+message GetValueResponse {
+  enum Status {
+	FAIL = 0;
+	OK = 1;
+  }
+  Status status = 1;
+  bytes value = 2;
+}
+
+
+service NodeService {
+  rpc SetValue(SetValueRequest) returns (SetValueResponse);
+  rpc GetValue(GetValueRequest) returns (GetValueResponse);
+}

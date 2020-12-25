@@ -3,8 +3,7 @@ syntax = "proto3";
 package ne_cache.node.grpc;
 option go_package = "node/grpc";
 
-message SetValueRequest {
-
+message HealthCheckRequest {
 }
 
 message HealthCheckResponse {
