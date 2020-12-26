@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"neko_server_go"
 	"neko_server_go/utils"
 
@@ -11,6 +12,11 @@ import (
 )
 
 func NodeAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
+	err := c.Request.ParseForm() //解析参数，默认是不会解析的
+	if err != nil {
+		utils.LogError(err)
+		return
+	}
 
 	nodeAddr := c.Request.PostForm.Get("node_addr")
 	uuid := c.Request.PostForm.Get("uuid")
