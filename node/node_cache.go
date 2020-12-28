@@ -91,6 +91,7 @@ func (c *cacheManage) PopEndSingleCache() *SingleCache {
 		c.EndSingleCache.back = nil
 		c.CacheSize -= int64(len(r.Value))
 		delete(c.Cache, r.Key)
+		return r
 	} else {
 		return nil
 	}
