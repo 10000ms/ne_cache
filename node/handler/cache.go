@@ -10,6 +10,7 @@ type NodeServer struct{}
 
 func (h *NodeServer) SetValue(ctx context.Context, request *grpcService.SetValueRequest) (*grpcService.SetValueResponse, error) {
 	s := node.SingleCache{
+		Key:    request.Key,
 		Value:  request.Value,
 		Expire: request.Expire,
 	}
