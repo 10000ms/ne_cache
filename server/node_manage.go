@@ -34,7 +34,7 @@ func (s *SingleNode) NodeClientCheck() error {
 			utils.LogError(err)
 			return err
 		}
-		s.Client = grpcService.NodeServiceClient(conn)
+		s.Client = grpcService.NewNodeServiceClient(conn)
 	}
 	return nil
 }
@@ -63,7 +63,7 @@ func (s *SingleNode) NodeSet(key string, value []byte, expire int64) error {
 	}
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*10)
 	defer cancel()
-	_, err := s.Client.SetValue(ctx, &grpcService.SetValueRequest{
+	_, err = s.Client.SetValue(ctx, &grpcService.SetValueRequest{
 		Key: key,
 		Value: value,
 		Expire: expire,
