@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"neko_server_go"
 	"neko_server_go/utils"
 
@@ -26,10 +25,11 @@ func NodeAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 		Status:   node_manage.NodeStatusUnKnow,
 	}
 
-
+	node_manage.NodeLock.Lock()
+	defer node_manage.NodeLock.Unlock()
 	node_manage.NodeList[uuid] = &n
 
-	_, err := fmt.Fprintf(w, "") //这个写入到w的是输出到客户端的
+	_, err = fmt.Fprintf(w, "") //这个写入到w的是输出到客户端的
 	if err != nil {
 		utils.LogError(err)
 		return

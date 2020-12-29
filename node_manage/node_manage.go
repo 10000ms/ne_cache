@@ -5,6 +5,7 @@ import (
 	"google.golang.org/grpc"
 	grpcService "ne_cache/node_manage/grpc"
 	"neko_server_go/utils"
+	"sync"
 	"time"
 )
 
@@ -24,10 +25,13 @@ type SingleNode struct {
 
 /*
 key 是uuid
- */
+*/
 var NodeList = make(map[string]*SingleNode)
+var NodeLock sync.RWMutex
 
 func LiveNodeList() map[string]*SingleNode {
+	NodeLock.RLock()
+	defer NodeLock.RUnlock()
 	r := make(map[string]*SingleNode)
 	for k, v := range NodeList {
 		if v.Status == NodeStatusServing {
@@ -49,6 +53,8 @@ func SingleCheck(node *SingleNode) error {
 }
 
 func NodeHealthCheck() {
+	NodeLock.Lock()
+	defer NodeLock.Unlock()
 	for k, v := range NodeList {
 		if v.Client != nil {
 			// 没建立连接先建立连接
@@ -64,6 +70,7 @@ func NodeHealthCheck() {
 			utils.LogError(err)
 			delete(NodeList, k)
 		}
+		v.Status = NodeStatusServing
 	}
 }
 

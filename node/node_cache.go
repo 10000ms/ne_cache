@@ -1,6 +1,7 @@
 package node
 
 import (
+	"math"
 	"math/rand"
 	grpcService "ne_cache/node/grpc"
 	"neko_server_go/utils"
@@ -33,6 +34,10 @@ var CacheManager = cacheManage{
 	ExpireAllCheckRate: 0.5,
 }
 
+func (s *SingleCache) Expired() bool {
+	return s.Expire != 0 && time.Now().Unix() >= s.Expire
+}
+
 func (c *cacheManage) Add(key string, cache SingleCache) {
 	c.Lock.Lock()
 	defer c.Lock.Unlock()
@@ -61,10 +66,14 @@ func (c *cacheManage) Get(key string) ([]byte, grpcService.GetValueResponse_Stat
 	defer c.Lock.RUnlock()
 	var v []byte
 	var s grpcService.GetValueResponse_Status
-	if c, ok := CacheManager.Cache[key]; ok {
-		// TODO 需要检查key是否过期
-		v = c.Value
-		s = grpcService.GetValueResponse_OK
+	if ca, ok := c.Cache[key]; ok {
+		if ca.Expired() {
+			v = make([]byte, 0)
+			s = grpcService.GetValueResponse_FAIL
+		} else {
+			v = ca.Value
+			s = grpcService.GetValueResponse_OK
+		}
 	} else {
 		v = make([]byte, 0)
 		s = grpcService.GetValueResponse_FAIL
@@ -72,44 +81,84 @@ func (c *cacheManage) Get(key string) ([]byte, grpcService.GetValueResponse_Stat
 	return v, s
 }
 
+func (c *cacheManage) Delete(key string) {
+	if ca, ok := c.Cache[key]; ok {
+		c.Lock.Lock()
+		defer c.Lock.Unlock()
+		if ca.back != nil {
+			ca.back.front = ca.front
+			ca.front.back = ca.back
+		} else {
+			c.EndSingleCache = ca.front
+			c.EndSingleCache.back = nil
+		}
+		c.CacheSize -= int64(len(ca.Value))
+		delete(c.Cache, ca.Key)
+	}
+}
+
 func (c *cacheManage) GetKeys() []string {
 	j := 0
 	keys := make([]string, len(c.Cache))
-	for k, _ := range c.Cache {
+	for k := range c.Cache {
 		keys[j] = k
 		j++
 	}
 	return keys
 }
 
-func (c *cacheManage) PopEndSingleCache() *SingleCache {
-	CacheManager.Lock.Lock()
-	defer CacheManager.Lock.Unlock()
+func (c *cacheManage) PopEndSingleCache() {
 	if c.EndSingleCache != nil {
-		r := c.EndSingleCache
-		c.EndSingleCache = r.front
-		c.EndSingleCache.back = nil
-		c.CacheSize -= int64(len(r.Value))
-		delete(c.Cache, r.Key)
-		return r
-	} else {
-		return nil
+		c.Delete(c.EndSingleCache.Key)
 	}
+}
+
+/*
+判断一个key是否过期，是就清除
+
+返回的bool是标识这个key是否过期，true是过期，false是未过期
+ */
+func (c *cacheManage) CheckExpire(key string) bool {
+	if ca, ok := c.Cache[key]; ok {
+		if ca.Expired() {
+			c.Delete(key)
+			return true
+		} else {
+			return false
+		}
+	}
+	// 不存在默认为过期了
+	return true
 }
 
 // 检测过期key
 func ExpireChecker() {
-	// TODO
-	// 加锁
-	if len(CacheManager.Cache) > 0 {
+	// 数量太少不进行过期检查
+	if len(CacheManager.Cache) > 10 {
 		utils.LogDebug("part key expire check")
 		CacheManager.Lock.Lock()
 		defer CacheManager.Lock.Unlock()
 
 		rand.Seed(time.Now().Unix())
 		k := CacheManager.GetKeys()
-
-
+		cacheSize := len(k)
+		checkCount := int(math.Round(float64(cacheSize) * CacheManager.ExpireCheckRate))
+		allCheckCount := int(math.Round(float64(checkCount) * CacheManager.ExpireAllCheckRate))
+		expireCount := 0
+		for i := 0; i < checkCount; i++ {
+			key := k[rand.Intn(100)]
+			e := CacheManager.CheckExpire(key)
+			if e == true {
+				expireCount += 1
+			}
+		}
+		// 确定是否需要全体检测
+		if expireCount >= allCheckCount {
+			ak := CacheManager.GetKeys()
+			for _, sk := range ak {
+				CacheManager.CheckExpire(sk)
+			}
+		}
 	}
 }
 
