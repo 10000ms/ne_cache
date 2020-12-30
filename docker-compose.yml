@@ -1,0 +1,58 @@
+version: "3"
+
+services:
+
+  node_1:
+    image: ne_cache
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+    environment:
+      - SERVICE_NAME=node
+      - UUID=72c76c69-2a03-45c6-9d3d-c382fb65e9a7
+
+  node_2:
+    image: ne_cache
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+    environment:
+      - SERVICE_NAME=node
+      - UUID=699ffddb-fc08-4b97-b51f-e5efcdc95062
+
+  node_3:
+    image: ne_cache
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+    environment:
+      - SERVICE_NAME=node
+      - UUID=94459cf9-ae93-4c47-86bb-a8dc5b3863d7
+
+  node_manage:
+    image: ne_cache
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+    environment:
+      - SERVICE_NAME=node_manage
+      - UUID=1
+
+  server:
+    image: ne_cache
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+    environment:
+      - SERVICE_NAME=server
+      - UUID=1

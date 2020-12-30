@@ -1,7 +1,9 @@
 package node
 
 import (
+	"flag"
 	"google.golang.org/grpc"
+	"ne_cache/node/cache"
 	grpcService "ne_cache/node/grpc"
 	"ne_cache/node/handler"
 	"neko_server_go/utils"
@@ -9,6 +11,8 @@ import (
 	"net/http"
 	"net/url"
 )
+
+var nodeUUID = flag.String("uuid", "", "节点的uuid")
 
 func main() {
 	// grpc 服务器启动
@@ -25,16 +29,23 @@ func main() {
 	RegisterNode()
 
 	// 检测
-	Checker()
+	cache.Checker()
 }
 
 // 注册node节点方法
 func RegisterNode() {
+	flag.Parse()
+	var u string
+	if *nodeUUID == "" {
+		u = Settings["uuid"].(string)
+	} else {
+		u = *nodeUUID
+	}
 	serverAddr := Settings["server_addr"].(string)
 	nodePort := Settings["node_port"].(string)
 	_, err := http.PostForm(serverAddr, url.Values{
 		"node_addr": {GetLocalIp() + nodePort},
-		"uuid":      {Settings["uuid"].(string)},
+		"uuid":      {u},
 	})
 	if err != nil {
 		utils.LogError(err)
@@ -42,6 +53,7 @@ func RegisterNode() {
 
 }
 
+// TODO 需要指定，docker内获取不到真实地址
 //获取本机ip
 func GetLocalIp() string {
 	addrs, err := net.InterfaceAddrs()

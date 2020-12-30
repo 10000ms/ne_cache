@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"io/ioutil"
+	"ne_cache/server/node"
 	"neko_server_go"
 	"neko_server_go/utils"
 	"net/http"
@@ -36,13 +37,13 @@ func GetNode() {
 		if err != nil {
 			utils.LogError(err)
 		}
-		var node map[string]*SingleNode
-		err = json.Unmarshal(bodyBytes, &node)
+		var n map[string]*node.SingleNode
+		err = json.Unmarshal(bodyBytes, &n)
 		if err != nil {
 			utils.LogError(err)
 		}
-		NodeManager.UpdateNodeList(node)
-		NodeManager.InitNodeManager()
+		node.NodeManager.UpdateNodeList(n)
+		node.NodeManager.InitNodeManager()
 	} else {
 		utils.LogError("request node manager error")
 	}
@@ -57,4 +58,3 @@ func GetNodeTimer() {
 		}
 	}()
 }
-

@@ -2,20 +2,20 @@ package handler
 
 import (
 	"context"
-	"ne_cache/node"
+	"ne_cache/node/cache"
 	grpcService "ne_cache/node/grpc"
 )
 
 type NodeServer struct{}
 
 func (h *NodeServer) SetValue(ctx context.Context, request *grpcService.SetValueRequest) (*grpcService.SetValueResponse, error) {
-	s := node.SingleCache{
+	s := cache.SingleCache{
 		Key:    request.Key,
 		Value:  request.Value,
 		Expire: request.Expire,
 	}
 
-	node.CacheManager.Add(request.Key, s)
+	cache.CacheManager.Add(request.Key, s)
 
 	r := grpcService.SetValueResponse{
 		Status: grpcService.SetValueResponse_OK,
@@ -24,7 +24,7 @@ func (h *NodeServer) SetValue(ctx context.Context, request *grpcService.SetValue
 }
 
 func (h *NodeServer) GetValue(ctx context.Context, request *grpcService.GetValueRequest) (*grpcService.GetValueResponse, error) {
-	v, s := node.CacheManager.Get(request.Key)
+	v, s := cache.CacheManager.Get(request.Key)
 
 	r := grpcService.GetValueResponse{
 		Value:  v,

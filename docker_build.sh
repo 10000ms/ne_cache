@@ -1,0 +1,1 @@
+docker build -t ne_cache:latest .

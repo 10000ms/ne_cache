@@ -3,7 +3,7 @@ package handler
 import (
 	"bytes"
 	"fmt"
-	"ne_cache/server"
+	"ne_cache/server/node"
 	"neko_server_go"
 	"neko_server_go/utils"
 	"strconv"
@@ -37,7 +37,7 @@ func CacheAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 		return
 	}
 
-	s := server.NodeManager.GetNode(cacheKey)
+	s := node.NodeManager.GetNode(cacheKey)
 	err = s.NodeSet(cacheKey, buf.Bytes(), expireInt64)
 	if err != nil {
 		utils.LogError(err)
@@ -61,7 +61,7 @@ func CacheGet(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 	p := *c.PathParams
 	cacheKey := p["cache_key"]
 
-	s := server.NodeManager.GetNode(cacheKey)
+	s := node.NodeManager.GetNode(cacheKey)
 	cache, err := s.NodeGet(cacheKey)
 	if err != nil {
 		utils.LogError(err)

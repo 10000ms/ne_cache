@@ -4,10 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/10000ms/ne_cache/node_manage/node"
 	"neko_server_go"
 	"neko_server_go/utils"
-
-	"ne_cache/node_manage"
 )
 
 func NodeAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
@@ -20,14 +19,14 @@ func NodeAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 	nodeAddr := c.Request.PostForm.Get("node_addr")
 	uuid := c.Request.PostForm.Get("uuid")
 
-	n := node_manage.SingleNode{
+	n := node.SingleNode{
 		NodeAddr: nodeAddr,
-		Status:   node_manage.NodeStatusUnKnow,
+		Status:   node.NodeStatusUnKnow,
 	}
 
-	node_manage.NodeLock.Lock()
-	defer node_manage.NodeLock.Unlock()
-	node_manage.NodeList[uuid] = &n
+	node.NodeLock.Lock()
+	defer node.NodeLock.Unlock()
+	node.NodeList[uuid] = &n
 
 	_, err = fmt.Fprintf(w, "") //这个写入到w的是输出到客户端的
 	if err != nil {
@@ -39,7 +38,7 @@ func NodeAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 func AllNodeInfo(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 	buf := &bytes.Buffer{}
 	encoder := json.NewEncoder(buf)
-	l := node_manage.LiveNodeList()
+	l := node.LiveNodeList()
 	err := encoder.Encode(l)
 	if err != nil {
 		utils.LogError(err, "Json unMarshal失败， c:%v", l)
