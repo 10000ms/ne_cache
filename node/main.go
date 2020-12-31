@@ -1,4 +1,4 @@
-package node
+package main
 
 import (
 	"flag"
@@ -13,18 +13,24 @@ import (
 )
 
 var nodeUUID = flag.String("uuid", "", "节点的uuid")
+var nodeAddr = flag.String("addr", "", "节点的addr")
+var nodePort = flag.String("port", "", "节点的port")
 
 func main() {
+	utils.LogInfo("准备启动node")
+
+	flag.Parse()
 	// grpc 服务器启动
 	rpcServer := grpc.NewServer()
 	grpcService.RegisterNodeHealthServer(rpcServer, &handler.HealthServer{})
 	grpcService.RegisterNodeServiceServer(rpcServer, &handler.NodeServer{})
-	listener, err := net.Listen("tcp", ":"+Settings["node_port"].(string))
+	listener, err := net.Listen("tcp", ":"+*nodePort)
 	if err != nil {
 		utils.LogError("服务监听端口失败", err)
 	}
 	_ = rpcServer.Serve(listener)
 
+	// TODO 修复阻塞问题
 	// 向服务发现注册服务
 	RegisterNode()
 
@@ -34,26 +40,28 @@ func main() {
 
 // 注册node节点方法
 func RegisterNode() {
-	flag.Parse()
-	var u string
+	utils.LogInfo("准备注册node")
+	var u, a string
 	if *nodeUUID == "" {
 		u = Settings["uuid"].(string)
 	} else {
 		u = *nodeUUID
 	}
+	if *nodeAddr == "" {
+		a = GetLocalIp()
+	} else {
+		a = *nodeAddr
+	}
 	serverAddr := Settings["server_addr"].(string)
-	nodePort := Settings["node_port"].(string)
 	_, err := http.PostForm(serverAddr, url.Values{
-		"node_addr": {GetLocalIp() + nodePort},
+		"node_addr": {a + ":" + *nodePort},
 		"uuid":      {u},
 	})
 	if err != nil {
 		utils.LogError(err)
 	}
-
 }
 
-// TODO 需要指定，docker内获取不到真实地址
 //获取本机ip
 func GetLocalIp() string {
 	addrs, err := net.InterfaceAddrs()

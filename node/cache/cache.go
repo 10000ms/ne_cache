@@ -174,6 +174,7 @@ func Checker() {
 	ticker := time.NewTicker(time.Second * 5)
 	go func() {
 		for range ticker.C {
+			utils.LogInfo("进行node检查")
 			ExpireChecker()
 			MemChecker()
 		}

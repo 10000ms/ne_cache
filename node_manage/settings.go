@@ -1,4 +1,4 @@
-package node_manage
+package main
 
 import (
 	"errors"
@@ -21,8 +21,8 @@ func getPath() string {
 
 var Settings = neko_server_go.Setting{
 	"ServiceName": "ne_cache_node_manage_server",
-	"Host":        "127.0.0.1",
-	"Port":        "11100",
+	"Host":        "",
+	"Port":        "8080",
 	"Debug":       true,
 	"Path":        getPath(),
 }

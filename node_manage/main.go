@@ -1,4 +1,4 @@
-package node_manage
+package main
 
 import (
 	"ne_cache/node_manage/node"

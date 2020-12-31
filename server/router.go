@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"ne_cache/server/handler"
