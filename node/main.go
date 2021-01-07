@@ -1,20 +1,22 @@
 package main
 
 import (
+	"errors"
 	"flag"
+	"github.com/10000ms/ne_cache/node/cache"
 	"google.golang.org/grpc"
-	"ne_cache/node/cache"
 	grpcService "ne_cache/node/grpc"
 	"ne_cache/node/handler"
 	"neko_server_go/utils"
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
-var nodeUUID = flag.String("uuid", "", "节点的uuid")
-var nodeAddr = flag.String("addr", "", "节点的addr")
-var nodePort = flag.String("port", "", "节点的port")
+var nodeUUID = flag.String("uuid", "test", "节点的uuid")
+var nodeAddr = flag.String("addr", "127.0.0.1", "节点的addr")
+var nodePort = flag.String("port", "8080", "节点的port")
 
 func main() {
 	utils.LogInfo("准备启动node")
@@ -28,14 +30,17 @@ func main() {
 	if err != nil {
 		utils.LogError("服务监听端口失败", err)
 	}
-	_ = rpcServer.Serve(listener)
 
-	// TODO 修复阻塞问题
 	// 向服务发现注册服务
 	RegisterNode()
 
 	// 检测
 	cache.Checker()
+
+	// 启动rpc服务
+	_ = rpcServer.Serve(listener)
+
+
 }
 
 // 注册node节点方法
@@ -52,14 +57,23 @@ func RegisterNode() {
 	} else {
 		a = *nodeAddr
 	}
-	serverAddr := Settings["server_addr"].(string)
-	_, err := http.PostForm(serverAddr, url.Values{
+	serverAddr := "http://" + Settings["server_addr"].(string) + "/v1/node/add"
+	resp, err := http.PostForm(serverAddr, url.Values{
 		"node_addr": {a + ":" + *nodePort},
 		"uuid":      {u},
 	})
 	if err != nil {
 		utils.LogError(err)
+		panic(err)
 	}
+
+	if resp.StatusCode != 200 {
+		s := "注册失败，StatusCode: " + strconv.Itoa(resp.StatusCode)
+		utils.LogError(err)
+		panic(errors.New(s))
+	}
+
+	utils.LogInfo("注册node成功！")
 }
 
 //获取本机ip

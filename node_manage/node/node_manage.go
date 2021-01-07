@@ -23,22 +23,32 @@ type SingleNode struct {
 	Client   grpcService.NodeHealthClient `json:"-"`
 }
 
-/*
-key 是uuid
-*/
-var NodeList = make(map[string]*SingleNode)
-var NodeLock sync.RWMutex
 
-func LiveNodeList() map[string]*SingleNode {
-	NodeLock.RLock()
-	defer NodeLock.RUnlock()
+type NodeManage struct{
+	List     map[string]*SingleNode // key 是uuid
+	NodeLock sync.RWMutex
+}
+
+func (n *NodeManage) LiveNodeList() map[string]*SingleNode {
+	n.NodeLock.RLock()
+	defer n.NodeLock.RUnlock()
 	r := make(map[string]*SingleNode)
-	for k, v := range NodeList {
+	for k, v := range n.List {
 		if v.Status == NodeStatusServing {
 			r[k] = v
 		}
 	}
 	return r
+}
+
+func (n *NodeManage) AddNode(uuid string, nodeAddr string) {
+	n.NodeLock.Lock()
+	defer n.NodeLock.Unlock()
+	s := SingleNode{
+		NodeAddr: nodeAddr,
+		Status:   NodeStatusUnKnow,
+	}
+	n.List[uuid] = &s
 }
 
 func SingleCheck(node *SingleNode) error {
@@ -52,23 +62,28 @@ func SingleCheck(node *SingleNode) error {
 	}
 }
 
+var NodeList = NodeManage{
+	List: make(map[string]*SingleNode),
+}
+
 func NodeHealthCheck() {
-	NodeLock.Lock()
-	defer NodeLock.Unlock()
-	for k, v := range NodeList {
+	utils.LogInfo("进行节点健康检查")
+	NodeList.NodeLock.Lock()
+	defer NodeList.NodeLock.Unlock()
+	for k, v := range NodeList.List {
 		if v.Client != nil {
 			// 没建立连接先建立连接
 			conn, err := grpc.Dial(v.NodeAddr, grpc.WithInsecure())
 			if err != nil {
 				utils.LogError(err)
-				delete(NodeList, k)
+				delete(NodeList.List, k)
 			}
 			v.Client = grpcService.NewNodeHealthClient(conn)
 		}
 		err := SingleCheck(v)
 		if err != nil {
 			utils.LogError(err)
-			delete(NodeList, k)
+			delete(NodeList.List, k)
 		}
 		v.Status = NodeStatusServing
 	}
@@ -76,7 +91,7 @@ func NodeHealthCheck() {
 
 func CheckTimer() {
 	go func() {
-		ticker := time.NewTicker(time.Second * 30)
+		ticker := time.NewTicker(time.Second * 3)
 		for {
 			NodeHealthCheck()
 			<-ticker.C

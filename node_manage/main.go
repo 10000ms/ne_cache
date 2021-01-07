@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	o := neko_server_go.Options{}
+	o := neko_server_go.Options{
+		InitFunc: []func(){node.CheckTimer},  // 健康检查
+	}
 	neko_server_go.StartAPP(Settings, &Router, &o)
-
-	node.CheckTimer()
 }

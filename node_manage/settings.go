@@ -22,7 +22,7 @@ func getPath() string {
 var Settings = neko_server_go.Setting{
 	"ServiceName": "ne_cache_node_manage_server",
 	"Host":        "",
-	"Port":        "8080",
+	"Port":        "8090",
 	"Debug":       true,
 	"Path":        getPath(),
 }

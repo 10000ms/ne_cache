@@ -11,11 +11,10 @@ import (
 )
 
 func main() {
-	o := neko_server_go.Options{}
+	o := neko_server_go.Options{
+		InitFunc: []func(){GetNodeTimer},  // 定期获取node
+	}
 	neko_server_go.StartAPP(Settings, &Router, &o)
-
-	// 定期获取node
-	GetNodeTimer()
 }
 
 // 获取node节点
