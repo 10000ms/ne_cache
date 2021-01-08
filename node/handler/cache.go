@@ -4,7 +4,6 @@ import (
 	"context"
 	"ne_cache/node/cache"
 	grpcService "ne_cache/node/grpc"
-	"neko_server_go/utils"
 )
 
 type NodeServer struct{}
@@ -26,8 +25,6 @@ func (h *NodeServer) SetValue(ctx context.Context, request *grpcService.SetValue
 
 func (h *NodeServer) GetValue(ctx context.Context, request *grpcService.GetValueRequest) (*grpcService.GetValueResponse, error) {
 	v, s := cache.CacheManager.Get(request.Key)
-
-	utils.LogInfo("get value ", v, s)
 
 	r := grpcService.GetValueResponse{
 		Value:  v,
