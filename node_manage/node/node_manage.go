@@ -67,22 +67,21 @@ var NodeList = NodeManage{
 }
 
 func NodeHealthCheck() {
-	utils.LogInfo("进行节点健康检查")
 	NodeList.NodeLock.Lock()
 	defer NodeList.NodeLock.Unlock()
 	for k, v := range NodeList.List {
-		if v.Client != nil {
+		if v.Client == nil {
 			// 没建立连接先建立连接
 			conn, err := grpc.Dial(v.NodeAddr, grpc.WithInsecure())
 			if err != nil {
-				utils.LogError(err)
+				utils.LogError("建立连接失败，准备移除节点，error: ", err)
 				delete(NodeList.List, k)
 			}
 			v.Client = grpcService.NewNodeHealthClient(conn)
 		}
 		err := SingleCheck(v)
 		if err != nil {
-			utils.LogError(err)
+			utils.LogError("健康检查失败，准备移除节点，error: ", err)
 			delete(NodeList.List, k)
 		}
 		v.Status = NodeStatusServing

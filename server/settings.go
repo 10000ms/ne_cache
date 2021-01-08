@@ -21,8 +21,9 @@ func getPath() string {
 
 var Settings = neko_server_go.Setting{
 	"ServiceName": "ne_cache_proxy_server",
+	"nodeManageAddr": "127.0.0.1:8090",
 	"Host":        "",
-	"Port":        "8080",
+	"Port":        "8091",
 	"Debug":       true,
 	"Path":        getPath(),
 }

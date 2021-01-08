@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func CacheAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
+func CacheSet(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 	err := c.Request.ParseForm() //解析参数，默认是不会解析的
 	if err != nil {
 		utils.LogError(err)
@@ -20,7 +20,7 @@ func CacheAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 	cacheKey := p["cache_key"]
 	expire := c.Request.Form.Get("expire")
 	var expireInt64 int64
-	if expire != "" {
+	if expire == "" {
 		expireInt64 = 0
 	} else {
 		expireInt64, err = strconv.ParseInt(expire, 10, 64)
@@ -68,7 +68,7 @@ func CacheGet(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 		return
 	}
 
-	_, err = fmt.Fprint(w, cache) //这个写入到w的是输出到客户端的
+	_, err = w.Write(cache) //这个写入到w的是输出到客户端的
 	if err != nil {
 		utils.LogError(err)
 		return

@@ -4,7 +4,6 @@ import (
 	"math"
 	"math/rand"
 	grpcService "ne_cache/node/grpc"
-	"neko_server_go/utils"
 	"sync"
 	"time"
 )
@@ -27,13 +26,6 @@ type cacheManage struct {
 	ExpireAllCheckRate float64 // 过期检查的key中，多少比例的key过期会触发全体key过期检查
 }
 
-var CacheManager = cacheManage{
-	Cache:              make(map[string]*SingleCache),
-	CacheSizeLimit:     1024 * 1024 * 1024,
-	ExpireCheckRate:    0.05,
-	ExpireAllCheckRate: 0.5,
-}
-
 func (s *SingleCache) Expired() bool {
 	return s.Expire != 0 && time.Now().Unix() >= s.Expire
 }
@@ -43,21 +35,22 @@ func (c *cacheManage) Add(key string, cache SingleCache) {
 	defer c.Lock.Unlock()
 	newSize := len(cache.Value)
 	// 如果已经有值，则更新
-	if v, ok := CacheManager.Cache[key]; ok {
+	if v, ok := c.Cache[key]; ok {
 		oldSize := len(v.Value)
-		CacheManager.Cache[key] = &cache
+		c.Cache[key] = &cache
 		cache.front = v.front
 		cache.back = v.back
-		CacheManager.CacheSize += int64(newSize - oldSize)
+		c.CacheSize += int64(newSize - oldSize)
 	} else {
-		CacheManager.Cache[key] = &cache
+		// 没有值则插入
+		c.Cache[key] = &cache
 		// 如果是不是第一个cache
-		if CacheManager.EndSingleCache != nil {
-			CacheManager.EndSingleCache.back = &cache
-			cache.front = CacheManager.EndSingleCache
+		if c.EndSingleCache != nil {
+			c.EndSingleCache.back = &cache
+			cache.front = c.EndSingleCache
 		}
-		CacheManager.EndSingleCache = &cache
-		CacheManager.CacheSize += int64(newSize)
+		c.EndSingleCache = &cache
+		c.CacheSize += int64(newSize)
 	}
 }
 
@@ -82,13 +75,20 @@ func (c *cacheManage) Get(key string) ([]byte, grpcService.GetValueResponse_Stat
 }
 
 func (c *cacheManage) Delete(key string) {
+	c.Lock.Lock()
+	defer c.Lock.Unlock()
 	if ca, ok := c.Cache[key]; ok {
-		c.Lock.Lock()
-		defer c.Lock.Unlock()
-		if ca.back != nil {
+		if ca.back == nil && ca.front == nil {
+			c.EndSingleCache = nil
+		} else if ca.back != nil {
 			ca.back.front = ca.front
-			ca.front.back = ca.back
+			ca.back = nil
+			if ca.front != nil {
+				ca.front.back = ca.back
+				ca.front = nil
+			}
 		} else {
+			ca.front.front = nil
 			c.EndSingleCache = ca.front
 			c.EndSingleCache.back = nil
 		}
@@ -98,6 +98,8 @@ func (c *cacheManage) Delete(key string) {
 }
 
 func (c *cacheManage) GetKeys() []string {
+	c.Lock.RLock()
+	defer c.Lock.RUnlock()
 	j := 0
 	keys := make([]string, len(c.Cache))
 	for k := range c.Cache {
@@ -113,15 +115,23 @@ func (c *cacheManage) PopEndSingleCache() {
 	}
 }
 
+var CacheManager = cacheManage{
+	Cache: make(map[string]*SingleCache),
+	CacheSizeLimit:     1024 * 1024 * 1024,
+	ExpireCheckRate:    0.05,
+	ExpireAllCheckRate: 0.5,
+}
+
 /*
-判断一个key是否过期，是就清除
+判断一个key是否过期
 
 返回的bool是标识这个key是否过期，true是过期，false是未过期
- */
+*/
 func (c *cacheManage) CheckExpire(key string) bool {
+	c.Lock.RLock()
+	defer c.Lock.RUnlock()
 	if ca, ok := c.Cache[key]; ok {
 		if ca.Expired() {
-			c.Delete(key)
 			return true
 		} else {
 			return false
@@ -135,10 +145,6 @@ func (c *cacheManage) CheckExpire(key string) bool {
 func ExpireChecker() {
 	// 数量太少不进行过期检查
 	if len(CacheManager.Cache) > 10 {
-		utils.LogDebug("part key expire check")
-		CacheManager.Lock.Lock()
-		defer CacheManager.Lock.Unlock()
-
 		rand.Seed(time.Now().Unix())
 		k := CacheManager.GetKeys()
 		cacheSize := len(k)
@@ -146,17 +152,21 @@ func ExpireChecker() {
 		allCheckCount := int(math.Round(float64(checkCount) * CacheManager.ExpireAllCheckRate))
 		expireCount := 0
 		for i := 0; i < checkCount; i++ {
-			key := k[rand.Intn(100)]
+			key := k[rand.Intn(cacheSize)]
 			e := CacheManager.CheckExpire(key)
 			if e == true {
 				expireCount += 1
+				CacheManager.Delete(key)
 			}
 		}
 		// 确定是否需要全体检测
 		if expireCount >= allCheckCount {
 			ak := CacheManager.GetKeys()
 			for _, sk := range ak {
-				CacheManager.CheckExpire(sk)
+				er := CacheManager.CheckExpire(sk)
+				if er == true {
+					CacheManager.Delete(sk)
+				}
 			}
 		}
 	}
@@ -170,15 +180,11 @@ func MemChecker() {
 }
 
 func Checker() {
-	var ch chan int
 	ticker := time.NewTicker(time.Second * 5)
 	go func() {
 		for range ticker.C {
-			utils.LogInfo("进行node检查")
 			ExpireChecker()
 			MemChecker()
 		}
-		ch <- 1
 	}()
-	<-ch
 }

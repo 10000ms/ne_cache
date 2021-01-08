@@ -36,7 +36,7 @@ func AllNodeInfo(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 	l := node.NodeList.LiveNodeList()
 	err := encoder.Encode(l)
 	if err != nil {
-		utils.LogError(err, "Json unMarshal失败， c:%v", l)
+		utils.LogError(c.LogRequestID(), err, "Json unMarshal失败， c:%v", l)
 	}
 	body := buf.Bytes()
 

@@ -27,7 +27,7 @@ type nodeManage struct {
 }
 
 func (s *SingleNode) NodeClientCheck() error {
-	if s.Client != nil {
+	if s.Client == nil {
 		// 没建立连接先建立连接
 		conn, err := grpc.Dial(s.NodeAddr, grpc.WithInsecure())
 		if err != nil {
@@ -51,6 +51,8 @@ func (s *SingleNode) NodeGet(key string) ([]byte, error) {
 	})
 	if err != nil {
 		return nil, err
+	} else if resp.Status != grpcService.GetValueResponse_OK {
+		return nil, nil
 	} else {
 		return resp.Value, nil
 	}
@@ -108,5 +110,8 @@ func (n *nodeManage) GetNode(key string) *SingleNode {
 }
 
 var NodeManager = nodeManage{
+	RawNodeList: make(map[string]*SingleNode),
+	HashMap: make(map[int]*SingleNode),
 	NodeMultiple: 4, // 4倍节点数
+	NodeHash: make([]int, 0),
 }

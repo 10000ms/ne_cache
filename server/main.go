@@ -19,7 +19,7 @@ func main() {
 
 // 获取node节点
 func GetNode() {
-	serverAddr := Settings["node_manage_addr"].(string)
+	serverAddr := "http://" + Settings["nodeManageAddr"].(string) + "/v1/node/info"
 	resp, err := http.Get(serverAddr)
 	if err != nil {
 		utils.LogError(err)

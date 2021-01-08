@@ -3,8 +3,8 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/10000ms/ne_cache/node/cache"
 	"google.golang.org/grpc"
+	"ne_cache/node/cache"
 	grpcService "ne_cache/node/grpc"
 	"ne_cache/node/handler"
 	"neko_server_go/utils"
@@ -40,7 +40,6 @@ func main() {
 	// 启动rpc服务
 	_ = rpcServer.Serve(listener)
 
-
 }
 
 // 注册node节点方法
@@ -57,7 +56,7 @@ func RegisterNode() {
 	} else {
 		a = *nodeAddr
 	}
-	serverAddr := "http://" + Settings["server_addr"].(string) + "/v1/node/add"
+	serverAddr := "http://" + Settings["serverAddr"].(string) + "/v1/node/add"
 	resp, err := http.PostForm(serverAddr, url.Values{
 		"node_addr": {a + ":" + *nodePort},
 		"uuid":      {u},
