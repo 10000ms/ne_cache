@@ -38,10 +38,12 @@ func CacheSet(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 	}
 
 	s := node.NodeManager.GetNode(cacheKey)
-	err = s.NodeSet(cacheKey, buf.Bytes(), expireInt64)
-	if err != nil {
-		utils.LogError(err)
-		return
+	if s != nil {
+		err = s.NodeSet(cacheKey, buf.Bytes(), expireInt64)
+		if err != nil {
+			utils.LogError(err)
+			return
+		}
 	}
 
 	_, err = fmt.Fprintf(w, "") //这个写入到w的是输出到客户端的
@@ -62,10 +64,14 @@ func CacheGet(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 	cacheKey := p["cache_key"]
 
 	s := node.NodeManager.GetNode(cacheKey)
-	cache, err := s.NodeGet(cacheKey)
-	if err != nil {
-		utils.LogError(err)
-		return
+
+	var cache []byte
+	if s != nil {
+		cache, err = s.NodeGet(cacheKey)
+		if err != nil {
+			utils.LogError(err)
+			return
+		}
 	}
 
 	_, err = w.Write(cache) //这个写入到w的是输出到客户端的

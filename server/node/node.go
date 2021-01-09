@@ -102,6 +102,9 @@ func (n *nodeManage) UpdateNodeList(node map[string]*SingleNode) {
 func (n *nodeManage) GetNode(key string) *SingleNode {
 	n.HashMapLock.RLock()
 	defer n.HashMapLock.RUnlock()
+	if len(n.HashMap) == 0 {
+		return nil
+	}
 	hash := int(crc32.ChecksumIEEE([]byte(key)))
 	idx := sort.Search(len(n.HashMap), func(i int) bool {
 		return n.NodeHash[i] >= hash

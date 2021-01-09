@@ -10,7 +10,11 @@ services:
         max-size: 10m
         max-file: "10"
     command:
-      - /ne_cache/bin/node -uuid=72c76c69-2a03-45c6-9d3d-c382fb65e9a7 -addr=node_1 -port=8080
+      - /bin/sh
+      - -c
+      - |
+        sleep 5
+        /ne_cache/bin/node -uuid=72c76c69-2a03-45c6-9d3d-c382fb65e9a7 -addr=node_1 -port=8080 -node_manager_addr=node_manage:8080
 
   node_2:
     image: ne_cache
@@ -19,16 +23,12 @@ services:
       options:
         max-size: 10m
         max-file: "10"
-    environment:
-      - SERVICE_NAME=node
-      - UUID=699ffddb-fc08-4b97-b51f-e5efcdc95062
-      - ADDR=node_2
-      - PORT=8080
     command:
       - /bin/sh
       - -c
       - |
-        /ne_cache/bin/$SERVICE_NAME -uuid=$UUID -addr=$ADDR -port=$PORT
+        sleep 5
+        /ne_cache/bin/node -uuid=699ffddb-fc08-4b97-b51f-e5efcdc95062 -addr=node_2 -port=8080 -node_manager_addr=node_manage:8080
 
   node_3:
     image: ne_cache
@@ -37,16 +37,12 @@ services:
       options:
         max-size: 10m
         max-file: "10"
-    environment:
-      - SERVICE_NAME=node
-      - UUID=94459cf9-ae93-4c47-86bb-a8dc5b3863d7
-      - ADDR=node_3
-      - PORT=8080
     command:
       - /bin/sh
       - -c
       - |
-        /ne_cache/bin/$SERVICE_NAME -uuid=$UUID -addr=$ADDR -port=$PORT
+        sleep 5
+        /ne_cache/bin/node -uuid=94459cf9-ae93-4c47-86bb-a8dc5b3863d7 -addr=node_3 -port=8080 -node_manager_addr=node_manage:8080
 
   node_manage:
     image: ne_cache
@@ -55,13 +51,11 @@ services:
       options:
         max-size: 10m
         max-file: "10"
-    environment:
-      - SERVICE_NAME=node_manage
     command:
       - /bin/sh
       - -c
       - |
-        /ne_cache/bin/$SERVICE_NAME
+        /ne_cache/bin/nodemanage
 
   server:
     image: ne_cache
@@ -72,10 +66,9 @@ services:
         max-file: "10"
     ports:
       - "8080:8080"
-    environment:
-      - SERVICE_NAME=server
     command:
       - /bin/sh
       - -c
       - |
-        /ne_cache/bin/$SERVICE_NAME
+        sleep 5
+        /ne_cache/bin/server -node_manager_addr=node_manage:8080

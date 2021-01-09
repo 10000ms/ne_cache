@@ -17,6 +17,7 @@ import (
 var nodeUUID = flag.String("uuid", "test", "节点的uuid")
 var nodeAddr = flag.String("addr", "127.0.0.1", "节点的addr")
 var nodePort = flag.String("port", "8080", "节点的port")
+var nodeManagerAddr = flag.String("node_manager_addr", "127.0.0.1:8090", "node服务管理的地址")
 
 func main() {
 	utils.LogInfo("准备启动node")
@@ -56,7 +57,7 @@ func RegisterNode() {
 	} else {
 		a = *nodeAddr
 	}
-	serverAddr := "http://" + Settings["serverAddr"].(string) + "/v1/node/add"
+	serverAddr := "http://" + *nodeManagerAddr + "/v1/node/add"
 	resp, err := http.PostForm(serverAddr, url.Values{
 		"node_addr": {a + ":" + *nodePort},
 		"uuid":      {u},

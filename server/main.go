@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"io/ioutil"
 	"ne_cache/server/node"
 	"neko_server_go"
@@ -10,7 +11,10 @@ import (
 	"time"
 )
 
+var nodeManagerAddr = flag.String("node_manager_addr", "127.0.0.1:8090", "node服务管理的地址")
+
 func main() {
+	flag.Parse()
 	o := neko_server_go.Options{
 		InitFunc: []func(){GetNodeTimer},  // 定期获取node
 	}
@@ -19,11 +23,11 @@ func main() {
 
 // 获取node节点
 func GetNode() {
-	serverAddr := "http://" + Settings["nodeManageAddr"].(string) + "/v1/node/info"
+	serverAddr := "http://" + *nodeManagerAddr + "/v1/node/info"
 	resp, err := http.Get(serverAddr)
 	if err != nil {
 		utils.LogError(err)
-		return
+		panic(err)
 	}
 	defer func() {
 		err := resp.Body.Close()
