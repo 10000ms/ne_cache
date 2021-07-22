@@ -21,7 +21,7 @@ func main() {
 	neko_server_go.StartAPP(Settings, &Router, &o)
 }
 
-// 获取node节点
+// GetNode 获取node节点
 func GetNode() {
 	serverAddr := "http://" + *nodeManagerAddr + "/v1/node/info"
 	resp, err := http.Get(serverAddr)
