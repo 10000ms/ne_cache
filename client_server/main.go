@@ -1,28 +1,32 @@
-package client_server
+package main
 
 import (
 	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"ne_cache/client_server/node"
+	"ne_cache/client_server/server"
 	"neko_server_go/utils"
-	"net"
 	"net/http"
 	"time"
 )
 
 var nodeManagerAddr = flag.String("node_manager_addr", "127.0.0.1:8090", "node服务管理的地址")
-var clientServerAddr = flag.String("port", SettingsServerAddr, "client服务器监听地址")
-
+var clientServerAddr = flag.String("port", Settings.SettingsServerAddr, "client服务器监听地址")
 
 func main() {
 	flag.Parse()
 	// 先启动获取节点的定时任务
-	GetNodeTimer()
-	// 启动tcp server
-	startServer()
-}
+	//GetNodeTimer()
 
+	// 处理一下settings
+	if Settings.SettingsServerAddr != *clientServerAddr {
+		Settings.SettingsServerAddr = *clientServerAddr
+	}
+
+	// 启动tcp server
+	server.StartServer(Settings)
+}
 
 //func handleConn(c net.Conn) {
 //	defer func() {
@@ -48,41 +52,6 @@ func main() {
 //		_, _ = c.Write([]byte(to))
 //	}
 //}
-
-
-func ProcessConn(c net.Conn) {
-	// TODO 连接池管理功能，避免keep alive的连接太多
-	defer func() {
-		_ = c.Close()
-	}()
-	remoteAddr := c.RemoteAddr()
-	utils.LogInfo(remoteAddr, " connect success")
-	r := RequestHandler{
-		Conn: c,
-		EndConn: false,
-	}
-	r.Process()
-}
-
-
-func startServer() {
-	l, err := net.Listen("tcp", *clientServerAddr)
-	if err != nil {
-		utils.LogError("listen error:", err)
-		return
-	}
-
-	for {
-		c, err := l.Accept()
-		if err != nil {
-			utils.LogError("accept error:", err)
-			break
-		}
-		// start a new goroutine to handle
-		// the new connection.
-		go ProcessConn(c)
-	}
-}
 
 // GetNode 获取node节点
 func GetNode() {
@@ -124,5 +93,3 @@ func GetNodeTimer() {
 		}
 	}()
 }
-
-

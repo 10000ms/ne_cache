@@ -66,8 +66,8 @@ func (s *SingleNode) NodeSet(key string, value []byte, expire int64) error {
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*10)
 	defer cancel()
 	_, err = s.Client.SetValue(ctx, &grpcService.SetValueRequest{
-		Key: key,
-		Value: value,
+		Key:    key,
+		Value:  value,
 		Expire: expire,
 	})
 	if err != nil {
@@ -113,8 +113,8 @@ func (n *nodeManage) GetNode(key string) *SingleNode {
 }
 
 var NodeManager = nodeManage{
-	RawNodeList: make(map[string]*SingleNode),
-	HashMap: make(map[int]*SingleNode),
+	RawNodeList:  make(map[string]*SingleNode),
+	HashMap:      make(map[int]*SingleNode),
 	NodeMultiple: 4, // 4倍节点数
-	NodeHash: make([]int, 0),
+	NodeHash:     make([]int, 0),
 }

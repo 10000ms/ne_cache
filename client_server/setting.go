@@ -1,9 +1,10 @@
-package client_server
+package main
 
-
-var (
-	// SettingsServerAddr 服务监听的地址
-	SettingsServerAddr = ":6379"
-	// SettingsBufferSize TCP每次读大小
-	SettingsBufferSize = 256
+import (
+	"ne_cache/client_server/common"
 )
+
+var Settings = common.SettingsBase{
+	SettingsServerAddr: ":6380",
+	SettingsBufferSize: 256,
+}
