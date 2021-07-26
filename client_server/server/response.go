@@ -10,15 +10,27 @@ type Response struct {
 	Conn net.Conn
 }
 
-func (r *Response) send(content []byte) {
+func (r *Response) Send(content []byte) {
 	utils.LogDebug("Response Send: ", content)
 	_, _ = r.Conn.Write(content)
 }
 
+func (r *Response) InternalError() {
+	r.Send([]byte("-ERR internal error\r\n"))
+}
+
 func (r *Response) UnknownCommand(op common.RedisCommand) {
-	r.send([]byte("-ERR unknown command " + string(op) + "\r\n"))
+	r.Send([]byte("-ERR unknown command " + string(op) + "\r\n"))
 }
 
 func (r *Response) OKStatus() {
-	r.send([]byte("+OK\r\n"))
+	r.Send([]byte("+OK\r\n"))
+}
+
+func (r *Response) WrongNumberOfArguments(op common.RedisCommand) {
+	r.Send([]byte("-ERR wrong number of arguments for " + string(op) + " command\r\n"))
+}
+
+func (r *Response) NoSuchKey() {
+	r.Send([]byte("-ERR no such key\r\n"))
 }

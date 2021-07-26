@@ -7,9 +7,9 @@ import (
 
 func router() map[common.RedisCommand]func(common.SettingsBase, *Request, net.Conn) {
 	r := map[common.RedisCommand]func(common.SettingsBase, *Request, net.Conn) {
-		common.RedisCommandCommand: CommandHandler,
-		common.RedisCommandSet: CommandHandler,
-		common.RedisCommandGet: CommandHandler,
+		common.RedisCommandCommand: CommandCommandHandler,
+		common.RedisCommandSet: CommandSetHandler,
+		common.RedisCommandGet: CommandGetHandler,
 	}
 	return r
 }
