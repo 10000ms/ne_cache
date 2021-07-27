@@ -30,7 +30,7 @@ func NewNodeHealthClient(cc grpc.ClientConnInterface) NodeHealthClient {
 
 func (c *nodeHealthClient) NodeHealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
 	out := new(HealthCheckResponse)
-	err := c.cc.Invoke(ctx, "/ne_cache.node.grpc.NodeHealth/NodeHealthCheck", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ne_cache.grpc.NodeHealth/NodeHealthCheck", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func _NodeHealth_NodeHealthCheck_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ne_cache.node.grpc.NodeHealth/NodeHealthCheck",
+		FullMethod: "/ne_cache.grpc.NodeHealth/NodeHealthCheck",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(NodeHealthServer).NodeHealthCheck(ctx, req.(*HealthCheckRequest))
@@ -82,7 +82,7 @@ func _NodeHealth_NodeHealthCheck_Handler(srv interface{}, ctx context.Context, d
 }
 
 var _NodeHealth_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "ne_cache.node.grpc.NodeHealth",
+	ServiceName: "ne_cache.grpc.NodeHealth",
 	HandlerType: (*NodeHealthServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -91,5 +91,5 @@ var _NodeHealth_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "node/grpc/health.proto",
+	Metadata: "grpc/health.proto",
 }

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"ne_cache/client_server/common"
+	"ne_cache/common"
 )
 
-var Settings = common.SettingsBase{
+var Settings = common.ClientSettingsBase{
 	SettingsServerAddr: ":6380",
 	SettingsBufferSize: 256,
 }

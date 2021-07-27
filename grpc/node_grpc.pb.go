@@ -31,7 +31,7 @@ func NewNodeServiceClient(cc grpc.ClientConnInterface) NodeServiceClient {
 
 func (c *nodeServiceClient) SetValue(ctx context.Context, in *SetValueRequest, opts ...grpc.CallOption) (*SetValueResponse, error) {
 	out := new(SetValueResponse)
-	err := c.cc.Invoke(ctx, "/ne_cache.node.grpc.NodeService/SetValue", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ne_cache.grpc.NodeService/SetValue", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *nodeServiceClient) SetValue(ctx context.Context, in *SetValueRequest, o
 
 func (c *nodeServiceClient) GetValue(ctx context.Context, in *GetValueRequest, opts ...grpc.CallOption) (*GetValueResponse, error) {
 	out := new(GetValueResponse)
-	err := c.cc.Invoke(ctx, "/ne_cache.node.grpc.NodeService/GetValue", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ne_cache.grpc.NodeService/GetValue", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func _NodeService_SetValue_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ne_cache.node.grpc.NodeService/SetValue",
+		FullMethod: "/ne_cache.grpc.NodeService/SetValue",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(NodeServiceServer).SetValue(ctx, req.(*SetValueRequest))
@@ -105,7 +105,7 @@ func _NodeService_GetValue_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ne_cache.node.grpc.NodeService/GetValue",
+		FullMethod: "/ne_cache.grpc.NodeService/GetValue",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(NodeServiceServer).GetValue(ctx, req.(*GetValueRequest))
@@ -114,7 +114,7 @@ func _NodeService_GetValue_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 var _NodeService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "ne_cache.node.grpc.NodeService",
+	ServiceName: "ne_cache.grpc.NodeService",
 	HandlerType: (*NodeServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -127,5 +127,5 @@ var _NodeService_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "node/grpc/node.proto",
+	Metadata: "grpc/node.proto",
 }

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"io/ioutil"
-	"ne_cache/server/node"
+	"ne_cache/common"
 	"neko_server_go"
 	"neko_server_go/utils"
 	"net/http"
@@ -16,7 +16,7 @@ var nodeManagerAddr = flag.String("node_manager_addr", "127.0.0.1:8090", "node�
 func main() {
 	flag.Parse()
 	o := neko_server_go.Options{
-		InitFunc: []func(){GetNodeTimer},  // 定期获取node
+		InitFunc: []func(){GetNodeTimer}, // 定期获取node
 	}
 	neko_server_go.StartAPP(Settings, &Router, &o)
 }
@@ -40,13 +40,13 @@ func GetNode() {
 		if err != nil {
 			utils.LogError(err)
 		}
-		var n map[string]*node.SingleNode
+		var n map[string]*common.ServerSingleNode
 		err = json.Unmarshal(bodyBytes, &n)
 		if err != nil {
 			utils.LogError(err)
 		}
-		node.NodeManager.UpdateNodeList(n)
-		node.NodeManager.InitNodeManager()
+		common.NodeManager.UpdateNodeList(n)
+		common.NodeManager.InitNodeManager()
 	} else {
 		utils.LogError("request node manager error")
 	}

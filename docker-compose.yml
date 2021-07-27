@@ -72,3 +72,19 @@ services:
       - |
         sleep 5
         /ne_cache/bin/server -node_manager_addr=node_manage:8080
+
+  client_server:
+    image: ne_cache
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+    ports:
+      - "8081:8081"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        sleep 5
+        /ne_cache/bin/client_server -node_manager_addr=node_manage:8080 -addr=:8081

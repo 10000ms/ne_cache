@@ -1,7 +1,8 @@
 package server
 
 import (
-	"ne_cache/client_server/common"
+	common2 "github.com/10000ms/ne_cache/common"
+	"ne_cache/common"
 	"neko_server_go/utils"
 	"net"
 	"strings"
@@ -68,14 +69,14 @@ func (r *RequestHandler) HandleRecv() {
 		if r.UnhandleBuffer[0] == 0 {
 			index = 2
 		}
-		if string(r.UnhandleBuffer[index-1]) == "*"{
+		if string(r.UnhandleBuffer[index-1]) == "*" {
 			// *表示参数数量
-			r.CurrentRequest.ParamsCount = common.BytesStringToInt(r.UnhandleBuffer[index:len(r.UnhandleBuffer)-2])
+			r.CurrentRequest.ParamsCount = common2.BytesStringToInt(r.UnhandleBuffer[index : len(r.UnhandleBuffer)-2])
 			// 清空UnhandleBuffer
 			r.UnhandleBuffer = make([]byte, 0)
 		} else if string(r.UnhandleBuffer[index-1]) == "$" {
 			p := RequestParam{
-				Length: common.BytesStringToInt(r.UnhandleBuffer[index:len(r.UnhandleBuffer)-2]),
+				Length: common2.BytesStringToInt(r.UnhandleBuffer[index : len(r.UnhandleBuffer)-2]),
 			}
 			r.CurrentRequest.Params = append(r.CurrentRequest.Params, p)
 			// 清空UnhandleBuffer
@@ -97,7 +98,7 @@ func (r *RequestHandler) Parse(buffer []byte, length int) {
 	}
 }
 
-func (r *RequestHandler) OneStep(settings common.SettingsBase) {
+func (r *RequestHandler) OneStep(settings common.ClientSettingsBase) {
 	buf := make([]byte, settings.SettingsBufferSize)
 	n, err := r.Conn.Read(buf)
 	if err != nil {
@@ -110,7 +111,7 @@ func (r *RequestHandler) OneStep(settings common.SettingsBase) {
 	}
 }
 
-func (r *RequestHandler) Process(settings common.SettingsBase) {
+func (r *RequestHandler) Process(settings common.ClientSettingsBase) {
 	for {
 		// 关闭连接以及没有可以处理的请求内容，退出循环
 		if r.EndConn == true && len(r.WaitHandleRequest) <= 0 {

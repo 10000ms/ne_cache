@@ -1,12 +1,12 @@
 package server
 
 import (
-	"ne_cache/client_server/common"
+	"ne_cache/common"
 	"neko_server_go/utils"
 	"net"
 )
 
-func ProcessConn(settings common.SettingsBase, c net.Conn) {
+func ProcessConn(settings common.ClientSettingsBase, c net.Conn) {
 	// TODO 连接池管理功能，避免keep alive的连接太多
 	defer func() {
 		_ = c.Close()
@@ -20,7 +20,7 @@ func ProcessConn(settings common.SettingsBase, c net.Conn) {
 	r.Process(settings)
 }
 
-func StartServer(settings common.SettingsBase) {
+func StartServer(settings common.ClientSettingsBase) {
 	l, err := net.Listen("tcp", settings.SettingsServerAddr)
 	if err != nil {
 		utils.LogError("listen error:", err)

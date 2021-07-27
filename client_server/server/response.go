@@ -1,7 +1,8 @@
 package server
 
 import (
-	"ne_cache/client_server/common"
+	"fmt"
+	"ne_cache/common"
 	"neko_server_go/utils"
 	"net"
 )
@@ -13,6 +14,11 @@ type Response struct {
 func (r *Response) Send(content []byte) {
 	utils.LogDebug("Response Send: ", content)
 	_, _ = r.Conn.Write(content)
+}
+
+func (r *Response) SendBulkStrings(content []byte) {
+	length := len(content)
+	r.Send([]byte(fmt.Sprintf("$%d\r\n%s\r\n", length, content)))
 }
 
 func (r *Response) InternalError() {

@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-package ne_cache.node.grpc;
-option go_package = "node/grpc";
+package ne_cache.grpc;
+option go_package = "./grpc";
 
 message HealthCheckRequest {
 }

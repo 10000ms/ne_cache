@@ -2,7 +2,7 @@ package handler
 
 import (
 	"context"
-	grpcService "ne_cache/node/grpc"
+	grpcService "ne_cache/grpc"
 )
 
 type HealthServer struct{}

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"ne_cache/node_manage/node"
+	"ne_cache/common"
 	"neko_server_go"
 	"neko_server_go/utils"
 )
@@ -19,7 +19,7 @@ func NodeAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 	nodeAddr := c.Request.PostForm.Get("node_addr")
 	uuid := c.Request.PostForm.Get("uuid")
 
-	node.NodeList.AddNode(uuid, nodeAddr)
+	common.NodeList.AddNode(uuid, nodeAddr)
 
 	utils.LogInfo(c.LogRequestID(), "注册node成功，node_addr: ", nodeAddr, " uuid: ", uuid)
 
@@ -33,7 +33,7 @@ func NodeAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 func AllNodeInfo(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 	buf := &bytes.Buffer{}
 	encoder := json.NewEncoder(buf)
-	l := node.NodeList.LiveNodeList()
+	l := common.NodeList.LiveNodeList()
 	err := encoder.Encode(l)
 	if err != nil {
 		utils.LogError(c.LogRequestID(), err, "Json unMarshal失败， c:%v", l)

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"flag"
 	"google.golang.org/grpc"
+	grpcService "ne_cache/grpc"
 	"ne_cache/node/cache"
-	grpcService "ne_cache/node/grpc"
 	"ne_cache/node/handler"
 	"neko_server_go/utils"
 	"net"
@@ -43,7 +43,7 @@ func main() {
 
 }
 
-// 注册node节点方法
+// RegisterNode 注册node节点方法
 func RegisterNode() {
 	utils.LogInfo("准备注册node")
 	var u, a string
@@ -76,7 +76,7 @@ func RegisterNode() {
 	utils.LogInfo("注册node成功！")
 }
 
-//获取本机ip
+// GetLocalIp 获取本机ip
 func GetLocalIp() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {

@@ -1,15 +1,15 @@
 package server
 
 import (
-	"ne_cache/client_server/common"
+	"ne_cache/common"
 	"net"
 )
 
-func router() map[common.RedisCommand]func(common.SettingsBase, *Request, net.Conn) {
-	r := map[common.RedisCommand]func(common.SettingsBase, *Request, net.Conn) {
+func router() map[common.RedisCommand]func(common.ClientSettingsBase, *Request, net.Conn) {
+	r := map[common.RedisCommand]func(common.ClientSettingsBase, *Request, net.Conn){
 		common.RedisCommandCommand: CommandCommandHandler,
-		common.RedisCommandSet: CommandSetHandler,
-		common.RedisCommandGet: CommandGetHandler,
+		common.RedisCommandSet:     CommandSetHandler,
+		common.RedisCommandGet:     CommandGetHandler,
 	}
 	return r
 }

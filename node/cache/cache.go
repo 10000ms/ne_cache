@@ -3,7 +3,7 @@ package cache
 import (
 	"math"
 	"math/rand"
-	grpcService "ne_cache/node/grpc"
+	grpcService "ne_cache/grpc"
 	"sync"
 	"time"
 )
@@ -116,13 +116,14 @@ func (c *cacheManage) PopEndSingleCache() {
 }
 
 var CacheManager = cacheManage{
-	Cache: make(map[string]*SingleCache),
+	Cache:              make(map[string]*SingleCache),
 	CacheSizeLimit:     1024 * 1024 * 1024,
 	ExpireCheckRate:    0.05,
 	ExpireAllCheckRate: 0.5,
 }
 
 /*
+CheckExpire
 判断一个key是否过期
 
 返回的bool是标识这个key是否过期，true是过期，false是未过期
@@ -141,7 +142,7 @@ func (c *cacheManage) CheckExpire(key string) bool {
 	return true
 }
 
-// 检测过期key
+// ExpireChecker 检测过期key
 func ExpireChecker() {
 	// 数量太少不进行过期检查
 	if len(CacheManager.Cache) > 10 {
@@ -172,7 +173,7 @@ func ExpireChecker() {
 	}
 }
 
-// 容量检测
+// MemChecker 容量检测
 func MemChecker() {
 	for CacheManager.CacheSize > CacheManager.CacheSizeLimit {
 		CacheManager.PopEndSingleCache()
