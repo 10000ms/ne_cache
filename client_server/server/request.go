@@ -120,15 +120,19 @@ func (r *RequestHandler) Process(settings common.ClientSettingsBase) {
 
 		// 先处理没有处理的请求
 		if len(r.WaitHandleRequest) > 0 {
-			if handler, ok := Router[r.WaitHandleRequest[0].Command]; ok {
-				// TODO 支持预校验request
-				handler(settings, r.WaitHandleRequest[0], r.Conn)
-			} else {
-				// 404
-				resp := Response{
-					Conn: r.Conn,
+			p := Validate(settings, r.WaitHandleRequest[0], r.Conn)
+			if p == true {
+				if handler, ok := Router[r.WaitHandleRequest[0].Command]; ok {
+					handler(settings, r.WaitHandleRequest[0], r.Conn)
+				} else {
+					// 校验器已经判断过是不是404，不应该进入这里
+					utils.LogError("missing handler error: ", r.WaitHandleRequest[0].Command)
+					// 404
+					resp := Response{
+						Conn: r.Conn,
+					}
+					resp.UnknownCommand(r.WaitHandleRequest[0].Command)
 				}
-				resp.UnknownCommand(r.WaitHandleRequest[0].Command)
 			}
 			// 处理完拿出这个WaitHandleRequest
 			r.WaitHandleRequest = r.WaitHandleRequest[1:]

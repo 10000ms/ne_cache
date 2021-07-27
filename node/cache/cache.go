@@ -9,11 +9,12 @@ import (
 )
 
 type SingleCache struct {
-	Key    string
-	Value  []byte
-	Expire int64
-	front  *SingleCache
-	back   *SingleCache
+	Key     string
+	Value   []byte
+	Expire  int64
+	SetTime int64
+	front   *SingleCache
+	back    *SingleCache
 }
 
 type cacheManage struct {
@@ -27,7 +28,7 @@ type cacheManage struct {
 }
 
 func (s *SingleCache) Expired() bool {
-	return s.Expire != 0 && time.Now().Unix() >= s.Expire
+	return s.Expire != 0 && time.Now().UnixNano() >= s.Expire + s.SetTime
 }
 
 func (c *cacheManage) Add(key string, cache SingleCache) {

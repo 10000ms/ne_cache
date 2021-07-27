@@ -5,7 +5,7 @@ import (
 	"net"
 )
 
-func router() map[common.RedisCommand]func(common.ClientSettingsBase, *Request, net.Conn) {
+func initRouter() map[common.RedisCommand]func(common.ClientSettingsBase, *Request, net.Conn) {
 	r := map[common.RedisCommand]func(common.ClientSettingsBase, *Request, net.Conn){
 		common.RedisCommandCommand: CommandCommandHandler,
 		common.RedisCommandSet:     CommandSetHandler,
@@ -14,4 +14,4 @@ func router() map[common.RedisCommand]func(common.ClientSettingsBase, *Request, 
 	return r
 }
 
-var Router = router()
+var Router = initRouter()

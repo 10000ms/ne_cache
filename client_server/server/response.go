@@ -21,6 +21,10 @@ func (r *Response) SendBulkStrings(content []byte) {
 	r.Send([]byte(fmt.Sprintf("$%d\r\n%s\r\n", length, content)))
 }
 
+func (r *Response) ParamsError() {
+	r.Send([]byte("-ERR params error\r\n"))
+}
+
 func (r *Response) InternalError() {
 	r.Send([]byte("-ERR internal error\r\n"))
 }

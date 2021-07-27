@@ -7,6 +7,7 @@ import (
 	"neko_server_go"
 	"neko_server_go/utils"
 	"strconv"
+	"time"
 )
 
 func CacheSet(c *neko_server_go.Context, w neko_server_go.ResWriter) {
@@ -18,16 +19,17 @@ func CacheSet(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 
 	p := *c.PathParams
 	cacheKey := p["cache_key"]
-	expire := c.Request.Form.Get("expire")
+	expire := c.Request.Form.Get("expire") // 这个的单位是milliseconds，过期时间
 	var expireInt64 int64
 	if expire == "" {
 		expireInt64 = 0
 	} else {
-		expireInt64, err = strconv.ParseInt(expire, 10, 64)
+		tempInt64, err := strconv.ParseInt(expire, 10, 64)
 		if err != nil {
 			utils.LogError(err)
 			return
 		}
+		expireInt64 = tempInt64 * int64(time.Millisecond)
 	}
 	cacheContent := c.Request.Body
 	buf := new(bytes.Buffer)

@@ -49,7 +49,7 @@ ne_cache总共包含4个部分：缓存节点、节点管理、Web缓存服务�
 ### 设值
 
 ```
-curl --location --request POST 'http://{{缓存服务地址}}/v1/cache/set/{{要缓存的key}}?expire={{缓存过期的时间戳}}' \
+curl --location --request POST 'http://{{缓存服务地址}}/v1/cache/set/{{要缓存的key}}?expire={{缓存过期（milliseconds）}}' \
 --header 'Content-Type: text/plain' \
 --data-raw '{{需要缓存的信息}}'
 ```

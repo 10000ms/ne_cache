@@ -4,6 +4,7 @@ import (
 	"context"
 	grpcService "ne_cache/grpc"
 	"ne_cache/node/cache"
+	"time"
 )
 
 type NodeServer struct{}
@@ -13,6 +14,7 @@ func (h *NodeServer) SetValue(ctx context.Context, request *grpcService.SetValue
 		Key:    request.Key,
 		Value:  request.Value,
 		Expire: request.Expire,
+		SetTime: time.Now().UnixNano(),
 	}
 
 	cache.CacheManager.Add(request.Key, s)
