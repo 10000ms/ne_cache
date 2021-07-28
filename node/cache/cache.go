@@ -28,7 +28,7 @@ type cacheManage struct {
 }
 
 func (s *SingleCache) Expired() bool {
-	return s.Expire != 0 && time.Now().UnixNano() >= s.Expire + s.SetTime
+	return s.Expire != 0 && time.Now().UnixNano() >= s.Expire+s.SetTime
 }
 
 func (c *cacheManage) Add(key string, cache SingleCache) {

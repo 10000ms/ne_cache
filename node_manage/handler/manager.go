@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"ne_cache/common"
@@ -31,14 +30,18 @@ func NodeAdd(c *neko_server_go.Context, w neko_server_go.ResWriter) {
 }
 
 func AllNodeInfo(c *neko_server_go.Context, w neko_server_go.ResWriter) {
-	buf := &bytes.Buffer{}
-	encoder := json.NewEncoder(buf)
-	l := common.NodeList.LiveNodeList()
-	err := encoder.Encode(l)
-	if err != nil {
-		utils.LogError(c.LogRequestID(), err, "Json unMarshal失败， c:%v", l)
+	l, LastUpdateTime := common.NodeList.LiveNodeList()
+	r := map[string]interface{}{
+		common.StringKeyLiveNodeList:   l,
+		common.StringKeyLastUpdateTime: LastUpdateTime,
 	}
-	body := buf.Bytes()
+
+	body, err := json.Marshal(r)
+	if err != nil {
+		utils.LogError(c.LogRequestID(), err, "Json Marshal失败， c: %v", r)
+	}
+
+	utils.LogDebug("response body: ", body)
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 

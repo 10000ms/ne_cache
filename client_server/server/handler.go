@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/binary"
 	"ne_cache/common"
 	"neko_server_go/utils"
 	"net"
@@ -31,7 +30,11 @@ func CommandGetHandler(settings common.ClientSettingsBase, request *Request, con
 			utils.LogError(err)
 			resp.InternalError()
 		}
-		resp.SendBulkStrings(cache)
+		if len(cache) == 0 {
+			resp.NoSuchKey()
+		} else {
+			resp.SendBulkStrings(cache)
+		}
 	} else {
 		resp.InternalError()
 	}
@@ -46,10 +49,11 @@ func CommandSetHandler(settings common.ClientSettingsBase, request *Request, con
 	if len(request.Params) == 3 {
 		expire = 0
 	} else if len(request.Params) == 5 {
-		if string(request.Params[3].Content) == "EX" {
-			expire = int64(binary.BigEndian.Uint64(request.Params[4].Content)) * int64(time.Second)
-		} else if string(request.Params[3].Content) == "PX" {
-			expire = int64(binary.BigEndian.Uint64(request.Params[4].Content)) * int64(time.Millisecond)
+		expirationIdx := 3
+		if string(request.Params[expirationIdx].Content) == "EX" {
+			expire = int64(common.BytesStringToInt(request.Params[expirationIdx+1].Content)) * int64(time.Second)
+		} else if string(request.Params[expirationIdx].Content) == "PX" {
+			expire = int64(common.BytesStringToInt(request.Params[expirationIdx+1].Content)) * int64(time.Millisecond)
 		} else {
 			resp.ParamsError()
 			return
@@ -61,7 +65,7 @@ func CommandSetHandler(settings common.ClientSettingsBase, request *Request, con
 	s := common.NodeManager.GetNode(key)
 	var err error
 	if s != nil {
-		err = s.NodeSet(string(request.Params[1].Content), request.Params[1].Content, expire)
+		err = s.NodeSet(string(request.Params[1].Content), request.Params[2].Content, expire)
 		if err != nil {
 			utils.LogError(err)
 			resp.InternalError()

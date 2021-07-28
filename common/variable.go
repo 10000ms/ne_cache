@@ -9,4 +9,5 @@ var NodeManager = ServerNodeManger{
 	HashMap:      make(map[int]*ServerSingleNode),
 	NodeMultiple: 4, // 4倍节点数
 	NodeHash:     make([]int, 0),
+	InitComplete: false,
 }
